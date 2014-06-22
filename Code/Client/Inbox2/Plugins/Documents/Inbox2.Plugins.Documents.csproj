@@ -303,6 +303,6 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetDir)*.*" "..\..\..\..\$(OutDir)"</PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetDir)*.*" "..\..\..\..\..\$(OutDir)"</PostBuildEvent>
   </PropertyGroup>
 </Project>
