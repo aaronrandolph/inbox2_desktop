@@ -26,3 +26,6 @@ debug
 js.js 
 app.js 
 css.css
+
+packages/*
+!packages/repositories.config

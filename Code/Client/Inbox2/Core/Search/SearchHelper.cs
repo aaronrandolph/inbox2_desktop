@@ -7,6 +7,7 @@ using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
+using Version = Lucene.Net.Util.Version;
 
 namespace Inbox2.Core.Search
 {
@@ -29,11 +30,11 @@ namespace Inbox2.Core.Search
 				doc.Add(
 					new Field(token.Name, token.Value, 
 					          token.Store ? Field.Store.YES : Field.Store.NO, 
-					          token.Tokenize ? Field.Index.TOKENIZED : Field.Index.UN_TOKENIZED));
+					          token.Tokenize ? Field.Index.ANALYZED : Field.Index.NOT_ANALYZED));
 			}
 
 			// Add type marker
-			doc.Add(new Field("Type", typeof(T).Name, Field.Store.YES, Field.Index.UN_TOKENIZED));
+            doc.Add(new Field("Type", typeof(T).Name, Field.Store.YES, Field.Index.NOT_ANALYZED));
 
 			return doc;
 		}
@@ -44,7 +45,7 @@ namespace Inbox2.Core.Search
 
 			string[] fields = new string[tokens.Count + 1];
 			string[] queries = new string[tokens.Count +1];			
-			BooleanClause.Occur[] occurs = new BooleanClause.Occur[tokens.Count + 1];
+			Occur[] occurs = new Occur[tokens.Count + 1];
 
 			for (int i = 0; i < tokens.Count; i++)
 			{
@@ -52,14 +53,14 @@ namespace Inbox2.Core.Search
 
 				queries[i] = token.Name;
 				fields[i] = searchQuery;
-				occurs[i] = BooleanClause.Occur.SHOULD;
+				occurs[i] = Occur.SHOULD;
 			}
 
 			queries[tokens.Count] = "Type";
 			fields[tokens.Count] = typeof(T).Name;
-			occurs[tokens.Count] = BooleanClause.Occur.SHOULD;
+			occurs[tokens.Count] = Occur.SHOULD;
 
-			return MultiFieldQueryParser.Parse(fields, queries, occurs, analyzer);
+			return MultiFieldQueryParser.Parse(Version.LUCENE_30, fields, queries, occurs, analyzer);
 		}		
 	}
 }

@@ -98,8 +98,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Inbox2.Utils.Scraper, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\..\ThirdParty\Json.Net\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.3\lib\net35\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition, Version=2008.11.24.0, Culture=neutral, processorArchitecture=MSIL">
@@ -193,6 +194,9 @@
     <EmbeddedResource Include="Resources\icon-10.png" />
     <EmbeddedResource Include="Resources\icon-13.png" />
     <EmbeddedResource Include="Resources\icon-64.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

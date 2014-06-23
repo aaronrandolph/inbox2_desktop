@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Web;
+using System.Web.UI;
 using System.Xml.Linq;
 using Inbox2.Platform.Channels.Entities;
 using Inbox2.Platform.Channels.Interfaces;
@@ -96,7 +97,7 @@ namespace Inbox2.Channels.Twitter
 		public IEnumerable<ChannelMessageHeader> GetDirectMessages()
 		{
 			var service = new TwitterService(ChannelHelper.ConsumerKey, ChannelHelper.ConsumerSecret, ChannelHelper.Token, ChannelHelper.TokenSecret);
-			var result = service.ListDirectMessagesReceived().Union(service.ListDirectMessagesSent());
+			var result = service.ListDirectMessagesReceived(new ListDirectMessagesReceivedOptions()).Union(service.ListDirectMessagesSent(new ListDirectMessagesSentOptions()));
 
 			foreach (var dm in result)
 			{
@@ -116,7 +117,7 @@ namespace Inbox2.Channels.Twitter
 		public ChannelSocialProfile GetProfile()
 		{
 			var service = new TwitterService(ChannelHelper.ConsumerKey, ChannelHelper.ConsumerSecret, ChannelHelper.Token, ChannelHelper.TokenSecret);
-			var result = service.GetUserProfile();
+			var result = service.GetUserProfile(new GetUserProfileOptions());
 
 			return new ChannelSocialProfile
 			    {
@@ -129,7 +130,7 @@ namespace Inbox2.Channels.Twitter
 		public IEnumerable<ChannelContact> GetContacts()
 		{
 			var service = new TwitterService(ChannelHelper.ConsumerKey, ChannelHelper.ConsumerSecret, ChannelHelper.Token, ChannelHelper.TokenSecret);
-			var result = service.ListFriends();
+			var result = service.ListFriends(new ListFriendsOptions());
 
 			foreach (var user in result)
 			{
@@ -162,20 +163,25 @@ namespace Inbox2.Channels.Twitter
 				};
 		}
 
-		public void Send(ChannelMessage message)
-		{
-			var service = new TwitterService(ChannelHelper.ConsumerKey, ChannelHelper.ConsumerSecret, ChannelHelper.Token, ChannelHelper.TokenSecret);
+	    public void Send(ChannelMessage message)
+	    {
+	        var service = new TwitterService(ChannelHelper.ConsumerKey, ChannelHelper.ConsumerSecret, ChannelHelper.Token,
+	            ChannelHelper.TokenSecret);
 
-			foreach (var singleToName in message.To)
-			{
-				service.SendDirectMessage(Int32.Parse(singleToName.Address), message.BodyText.ReadString());
-			}
-		}				
+	        foreach (var singleToName in message.To)
+	        {
+	            service.SendDirectMessage(new SendDirectMessageOptions()
+	            {
+	                UserId = Int32.Parse(singleToName.Address),
+	                Text = message.BodyText.ReadString()
+	            });
+	        }
+	    }
 
 		public IEnumerable<ChannelStatusUpdate> GetMentions(int pageSize)
 		{
 			var service = new TwitterService(ChannelHelper.ConsumerKey, ChannelHelper.ConsumerSecret, ChannelHelper.Token, ChannelHelper.TokenSecret);
-			var result = service.ListTweetsMentioningMe();
+			var result = service.ListTweetsMentioningMe(new ListTweetsMentioningMeOptions());
 
 			foreach (var tweet in result)
 			{
@@ -195,7 +201,7 @@ namespace Inbox2.Channels.Twitter
 		public IEnumerable<ChannelStatusUpdate> GetUpdates(int pageSize)
 		{
 			var service = new TwitterService(ChannelHelper.ConsumerKey, ChannelHelper.ConsumerSecret, ChannelHelper.Token, ChannelHelper.TokenSecret);
-			var result = service.ListTweetsOnFriendsTimeline();
+			var result = service.ListTweetsOnHomeTimeline(new ListTweetsOnHomeTimelineOptions() { Count = pageSize });
 
 			foreach (var tweet in result)
 			{
@@ -215,7 +221,7 @@ namespace Inbox2.Channels.Twitter
 		public IEnumerable<ChannelStatusUpdate> GetUserUpdates(string username, int count)
 		{
 			var service = new TwitterService(ChannelHelper.ConsumerKey, ChannelHelper.ConsumerSecret, ChannelHelper.Token, ChannelHelper.TokenSecret);
-			var result = service.ListTweetsOnSpecifiedUserTimeline(Int32.Parse(username));
+		    var result = service.ListTweetsOnUserTimeline(new ListTweetsOnUserTimelineOptions() {UserId = Int32.Parse(username)});
 
 			foreach (var tweet in result)
 			{
@@ -235,7 +241,7 @@ namespace Inbox2.Channels.Twitter
 		public IEnumerable<ChannelStatusUpdate> GetUpdates(string keyword, int pageSize)
 		{
 			var service = new TwitterService(ChannelHelper.ConsumerKey, ChannelHelper.ConsumerSecret, ChannelHelper.Token, ChannelHelper.TokenSecret);
-			var result = service.Search(keyword, pageSize);
+			var result = service.Search(new SearchOptions(){ Q = keyword, Count = pageSize});
 
 			foreach (var tweet in result.Statuses)
 			{
@@ -257,9 +263,9 @@ namespace Inbox2.Channels.Twitter
 			var service = new TwitterService(ChannelHelper.ConsumerKey, ChannelHelper.ConsumerSecret, ChannelHelper.Token, ChannelHelper.TokenSecret);
 
 			if (!String.IsNullOrEmpty(update.InReplyTo))
-				service.SendTweet(update.Status, Int64.Parse(update.InReplyTo));
+				service.SendTweet(new SendTweetOptions() { Status = update.Status, InReplyToStatusId = Int64.Parse(update.InReplyTo)});
 			else
-				service.SendTweet(update.Status);
+                service.SendTweet(new SendTweetOptions() { Status = update.Status });
 		}
 
 		IClientStatusUpdatesChannel IClientStatusUpdatesChannel.Clone()

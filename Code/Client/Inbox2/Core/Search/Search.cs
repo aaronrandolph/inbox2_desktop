@@ -16,20 +16,24 @@ using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
+using Lucene.Net.Store;
+using Directory = Lucene.Net.Store.Directory;
+using Version = Lucene.Net.Util.Version;
 
 namespace Inbox2.Core.Search
 {
 	[Export(typeof(ISearch))]
 	public class Search : ISearch, ISynchronizedObject
 	{
-		private readonly string path;
+		private readonly Directory path;
 		private readonly Analyzer analyzer;
 		private int? maxResults = null;
 
 		public Search()
 		{
-			this.path = Path.Combine(DebugKeys.DefaultDataDirectory, "search");
-			analyzer = new StandardAnalyzer();
+			string index = Path.Combine(DebugKeys.DefaultDataDirectory, "search");
+		    this.path = new SimpleFSDirectory(new DirectoryInfo(index));
+			analyzer = new StandardAnalyzer(Version.LUCENE_30);
 		}
 
 		/// <summary>
@@ -43,7 +47,7 @@ namespace Inbox2.Core.Search
 
 			var doc = SearchHelper.CreateDocument(source, mappers);
 
-			if (doc.GetFieldsCount() == 0)
+			if (doc.GetFields().Count == 0)
 			{
 				Logger.Debug("Document did not contain any fields, ignoring add", LogSource.Search);
 
@@ -53,9 +57,9 @@ namespace Inbox2.Core.Search
 			using (WriterLock)
 			{
 				// Add document to the index
-				IndexWriter writer = new IndexWriter(path, analyzer, false);
+				IndexWriter writer = new IndexWriter(path, analyzer, false, IndexWriter.MaxFieldLength.UNLIMITED);
 				writer.AddDocument(doc);
-				writer.Close();
+                writer.Dispose();
 			}
 		}
 
@@ -75,9 +79,9 @@ namespace Inbox2.Core.Search
 				using (WriterLock)
 				{
 					// Add document to the index
-					IndexReader reader = IndexReader.Open(path);
+					IndexReader reader = IndexReader.Open(path, false);
 					reader.DeleteDocuments(new Term(pk.Name, value.ToString()));
-					reader.Close();
+                    reader.Dispose();
 				}
 			}
 		}
@@ -91,8 +95,8 @@ namespace Inbox2.Core.Search
 			{
 				IndexSearcher searcher = new IndexSearcher(path);
 
-				Hits hits = searcher.Search(query);
-				int count = hits.Length();
+				TopDocs hits = searcher.Search(query, 100);
+				int count = hits.TotalHits;
 
 				try
 				{
@@ -101,22 +105,23 @@ namespace Inbox2.Core.Search
 						if (maxResults.HasValue && i > maxResults)
 							yield break;
 
-						var doc = hits.Doc(i);
+						var docId = hits.ScoreDocs[i];
+					    var doc = searcher.Doc(docId.Doc);
 
 						Field primaryId = doc.GetField(primary);
 
 						if (primaryId != null)
 						{
-							var value = primaryId.StringValue();
+							var value = primaryId.StringValue;
 
 							if (!String.IsNullOrEmpty(value))
-								yield return Int64.Parse(primaryId.StringValue());
+								yield return Int64.Parse(value);
 						}
 					}
 				}
 				finally
 				{
-					searcher.Close();	
+                    searcher.Dispose();	
 				}				
 			}
 		}
@@ -156,16 +161,16 @@ namespace Inbox2.Core.Search
 		{
 			get
 			{
-				return new ReaderLock(ClientState.Current.Search as ISynchronizedObject);
-			}
+                return new ReaderLock(ClientState.Current.Search as ISynchronizedObject);
+            }
 		}
 
 		public static WriterLock WriterLock
 		{
 			get
 			{
-				return new WriterLock(ClientState.Current.Search as ISynchronizedObject);
-			}
+                return new WriterLock(ClientState.Current.Search as ISynchronizedObject);
+            }
 		}
 
 		#endregion	

@@ -99,9 +99,8 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FluidKit, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\ThirdParty\FluidKit\FluidKit.dll</HintPath>
+    <Reference Include="FluidKit">
+      <HintPath>..\..\..\..\packages\FluidKit.1.0\lib\net35\FluidKit.dll</HintPath>
     </Reference>
     <Reference Include="Inbox2.Platform.Channels">
       <HintPath>..\..\..\..\Stable Assemblies\Inbox2.Platform.Channels.dll</HintPath>
@@ -195,6 +194,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -303,6 +303,6 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetDir)*.*" "..\..\..\..\..\$(OutDir)"</PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetDir)*.*" "$(SolutionDir)\Client\Inbox2\$(OutDir)"</PostBuildEvent>
   </PropertyGroup>
 </Project>

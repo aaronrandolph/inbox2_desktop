@@ -117,7 +117,7 @@
 										  PopoutDistance="3"
 										  HasReflection="true"
                                           Background="Transparent"   
-										  SelectedIndexChanged="ElementFlowSelectedIndexChanged">
+										  SelectionChanged="ElementFlowSelectedIndexChanged">
                             <fluidkit:ElementFlow.Camera>
                                 <PerspectiveCamera FieldOfView="60"
 											   Position="0,0,6"

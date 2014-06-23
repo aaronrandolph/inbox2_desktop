@@ -100,7 +100,7 @@
   <ItemGroup>
     <Reference Include="FluidKit, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\ThirdParty\FluidKit\FluidKit.dll</HintPath>
+      <HintPath>..\..\..\packages\FluidKit.1.0\lib\net35\FluidKit.dll</HintPath>
     </Reference>
     <Reference Include="Inbox2.Channels.Imap2">
       <HintPath>..\..\..\Stable Assemblies\Inbox2.Channels.Imap2.dll</HintPath>
@@ -275,6 +275,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
